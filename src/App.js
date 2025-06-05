@@ -80,22 +80,18 @@ function App() {
       let url = "";
 
       if (searchQuery) {
-        // Search movies by query
         url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(
           searchQuery
         )}&page=${page}`;
       } else if (selectedGenre) {
-        // Filter by genre
         url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${selectedGenre}&page=${page}&sort_by=popularity.desc`;
       } else {
-        // Popular movies
         url = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&page=${page}`;
       }
 
       try {
         const res = await fetch(url);
         const data = await res.json();
-
         if (data.results) {
           setMovies((prev) =>
             page === 1 ? data.results : [...prev, ...data.results]
@@ -112,7 +108,6 @@ function App() {
     fetchMovies();
   }, [page, selectedGenre, searchQuery]);
 
-  // Reset movies when search query or genre changes
   useEffect(() => {
     setMovies([]);
     setPage(1);
@@ -153,20 +148,19 @@ function App() {
   return (
     <div className="flex">
       <div className="flex-1 p-4 overflow-auto" style={{ maxHeight: "100vh" }}>
-        <h1 className="text-3xl font-bold mb-4 text-navy">Movies</h1>
+        <h1 className="text-3xl font-bold mb-4 text-blue-900">Movies</h1>
 
-        {/* Search Bar */}
         <SearchBar onSearch={setSearchQuery} />
 
         <div className="mb-4 flex flex-wrap gap-2">
           <button
             onClick={() => {
               setSelectedGenre(null);
-              setSearchQuery(""); // clear search on All click
+              setSearchQuery("");
             }}
             className={`px-3 py-1 rounded ${
               selectedGenre === null && !searchQuery
-                ? "bg-navy text-white"
+                ? "bg-blue-900 text-white"
                 : "bg-gray-200"
             }`}
           >
@@ -177,10 +171,12 @@ function App() {
               key={genre.id}
               onClick={() => {
                 setSelectedGenre(genre.id);
-                setSearchQuery(""); // clear search on genre select
+                setSearchQuery("");
               }}
               className={`px-3 py-1 rounded ${
-                selectedGenre === genre.id ? "bg-navy text-white" : "bg-gray-200"
+                selectedGenre === genre.id
+                  ? "bg-blue-900 text-white"
+                  : "bg-gray-200"
               }`}
             >
               {genre.name}
@@ -200,7 +196,7 @@ function App() {
           <button
             onClick={loadMore}
             disabled={loading}
-            className="mt-4 w-full py-2 bg-navy text-white rounded hover:bg-blue-800"
+            className="mt-4 w-full py-2 bg-blue-900 text-white rounded hover:bg-blue-700"
           >
             {loading ? "Loading..." : "Load More"}
           </button>
@@ -209,7 +205,7 @@ function App() {
 
       <div className="w-80 p-4 border-l bg-gray-100 min-h-screen overflow-auto">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-bold text-navy">My Playlist</h2>
+          <h2 className="text-xl font-bold text-blue-900">My Playlist</h2>
           {playlist.length > 0 && (
             <button
               onClick={clearPlaylist}
