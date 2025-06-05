@@ -1,14 +1,42 @@
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import MovieList from "./MovieList";
 import Playlist from "./Playlist/Playlist";
 
 const API_KEY = "28ebe4237f52c522f985e602fb50be52";
+
+function SearchBar({ onSearch }) {
+  const [query, setQuery] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSearch(query.trim());
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="mb-4 flex">
+      <input
+        type="text"
+        placeholder="Search movies..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        type="submit"
+        className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
+      >
+        Search
+      </button>
+    </form>
+  );
+}
 
 function App() {
   const [movies, setMovies] = useState([]);
   const [page, setPage] = useState(1);
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [playlist, setPlaylist] = useState(() => {
     const stored = localStorage.getItem("playlist");
@@ -51,9 +79,16 @@ function App() {
       setLoading(true);
       let url = "";
 
-      if (selectedGenre) {
+      if (searchQuery) {
+        // Search movies by query
+        url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(
+          searchQuery
+        )}&page=${page}`;
+      } else if (selectedGenre) {
+        // Filter by genre
         url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${selectedGenre}&page=${page}&sort_by=popularity.desc`;
       } else {
+        // Popular movies
         url = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&page=${page}`;
       }
 
@@ -75,13 +110,14 @@ function App() {
     }
 
     fetchMovies();
-  }, [page, selectedGenre]);
+  }, [page, selectedGenre, searchQuery]);
 
+  // Reset movies when search query or genre changes
   useEffect(() => {
     setMovies([]);
     setPage(1);
     setHasMore(true);
-  }, [selectedGenre]);
+  }, [searchQuery, selectedGenre]);
 
   const addToPlaylist = (movie) => {
     setPlaylist((prev) => {
@@ -119,11 +155,19 @@ function App() {
       <div className="flex-1 p-4 overflow-auto" style={{ maxHeight: "100vh" }}>
         <h1 className="text-3xl font-bold mb-4 text-navy">Movies</h1>
 
+        {/* Search Bar */}
+        <SearchBar onSearch={setSearchQuery} />
+
         <div className="mb-4 flex flex-wrap gap-2">
           <button
-            onClick={() => setSelectedGenre(null)}
+            onClick={() => {
+              setSelectedGenre(null);
+              setSearchQuery(""); // clear search on All click
+            }}
             className={`px-3 py-1 rounded ${
-              selectedGenre === null ? "bg-navy text-white" : "bg-gray-200"
+              selectedGenre === null && !searchQuery
+                ? "bg-navy text-white"
+                : "bg-gray-200"
             }`}
           >
             All
@@ -131,11 +175,12 @@ function App() {
           {genres.map((genre) => (
             <button
               key={genre.id}
-              onClick={() => setSelectedGenre(genre.id)}
+              onClick={() => {
+                setSelectedGenre(genre.id);
+                setSearchQuery(""); // clear search on genre select
+              }}
               className={`px-3 py-1 rounded ${
-                selectedGenre === genre.id
-                  ? "bg-navy text-white"
-                  : "bg-gray-200"
+                selectedGenre === genre.id ? "bg-navy text-white" : "bg-gray-200"
               }`}
             >
               {genre.name}
