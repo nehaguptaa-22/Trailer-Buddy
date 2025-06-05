@@ -34,7 +34,6 @@ function MovieCard({ movie, onAddToPlaylist, onRecommend }) {
 
   return (
     <div className="border rounded p-3 w-full max-w-xs bg-white shadow-md flex flex-col items-center">
-      {/* Poster image with fixed width and height, object-contain to avoid cropping */}
       <img
         src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
         alt={movie.title}
@@ -42,10 +41,10 @@ function MovieCard({ movie, onAddToPlaylist, onRecommend }) {
       />
       <h3 className="text-md font-semibold mt-2 text-center truncate w-full">{movie.title}</h3>
       <p className="text-sm mt-1">
-        <strong>Rating:</strong> {movie.vote_average} <span className="text-yellow-400">★</span>
+        <strong>Rating:</strong> {movie.vote_average}{" "}
+        <span className="text-yellow-400">★</span>
       </p>
 
-      {/* Trailer iframe with fixed height and width 100% */}
       {trailerKey && (
         <div className="mt-2 w-full">
           <iframe
@@ -61,7 +60,6 @@ function MovieCard({ movie, onAddToPlaylist, onRecommend }) {
         </div>
       )}
 
-      {/* Add to Playlist Button */}
       {onAddToPlaylist && (
         <button
           className="mt-3 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm w-full"
@@ -71,7 +69,6 @@ function MovieCard({ movie, onAddToPlaylist, onRecommend }) {
         </button>
       )}
 
-      {/* Recommend Button & Input */}
       {onRecommend && (
         <>
           {showRecommendInput ? (
@@ -115,4 +112,4 @@ function MovieCard({ movie, onAddToPlaylist, onRecommend }) {
   );
 }
 
-export default MovieCard;
+export default React.memo(MovieCard);
