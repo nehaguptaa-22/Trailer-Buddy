@@ -1,20 +1,25 @@
 import React from "react";
-import PlaylistItem from "./PlaylistItem";
+import MovieCard from "../MovieCard";
+ // this is important!
 
 function Playlist({ movies, onRemove }) {
-  if (movies.length === 0) {
-    return <p className="text-gray-500">Your playlist is empty.</p>;
-  }
-
   return (
     <div className="space-y-4">
-      {movies.map((movie) => (
-        <PlaylistItem
-          key={movie.id}
-          movie={movie}
-          onRemove={() => onRemove(movie.id)} // pass id to remove handler
-        />
-      ))}
+      {movies.length === 0 ? (
+        <p className="text-gray-600">Your playlist is empty.</p>
+      ) : (
+        movies.map((movie) => (
+          <div key={movie.id} className="relative">
+            <MovieCard movie={movie} />
+            <button
+              onClick={() => onRemove(movie.id)}
+              className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+            >
+              Remove
+            </button>
+          </div>
+        ))
+      )}
     </div>
   );
 }

@@ -26,29 +26,32 @@ function MovieCard({ movie, onAddToPlaylist, onRecommend }) {
 
   const handleRecommendSubmit = () => {
     if (friendName.trim()) {
-      onRecommend(movie, friendName.trim());
+      if (onRecommend) onRecommend(movie, friendName.trim());
       setFriendName("");
       setShowRecommendInput(false);
     }
   };
 
   return (
-    <div className="border rounded p-4 w-64 bg-white shadow flex flex-col">
+    <div className="border rounded p-3 w-full max-w-xs bg-white shadow-md flex flex-col items-center">
+      {/* Poster image with fixed width and height, object-contain to avoid cropping */}
       <img
-        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+        src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
         alt={movie.title}
-        className="w-full h-80 object-cover rounded"
+        className="w-40 h-56 object-contain rounded"
       />
-      <h3 className="text-xl font-semibold mt-2">{movie.title}</h3>
-      <p className="text-sm mb-2">
-        <strong>Rating:</strong> {movie.vote_average}
+      <h3 className="text-md font-semibold mt-2 text-center truncate w-full">{movie.title}</h3>
+      <p className="text-sm mt-1">
+        <strong>Rating:</strong> {movie.vote_average} <span className="text-yellow-400">★</span>
       </p>
+
+      {/* Trailer iframe with fixed height and width 100% */}
       {trailerKey && (
-        <div className="mt-2">
+        <div className="mt-2 w-full">
           <iframe
             title="Trailer"
             width="100%"
-            height="200"
+            height="140"
             src={`https://www.youtube.com/embed/${trailerKey}`}
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -57,48 +60,56 @@ function MovieCard({ movie, onAddToPlaylist, onRecommend }) {
           ></iframe>
         </div>
       )}
-      
-      <button
-        className="mt-3 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-        onClick={() => onAddToPlaylist(movie)}
-      >
-        Add to Playlist
-      </button>
 
-      {showRecommendInput ? (
-        <div className="mt-3 flex flex-col space-y-2">
-          <input
-            type="text"
-            placeholder="Friend's name"
-            value={friendName}
-            onChange={(e) => setFriendName(e.target.value)}
-            className="border rounded px-2 py-1 text-sm"
-          />
-          <div className="flex space-x-2">
-            <button
-              onClick={handleRecommendSubmit}
-              className="flex-1 bg-green-600 text-white py-1 rounded hover:bg-green-700 text-sm"
-            >
-              Send Recommendation
-            </button>
-            <button
-              onClick={() => {
-                setShowRecommendInput(false);
-                setFriendName("");
-              }}
-              className="flex-1 bg-gray-300 py-1 rounded hover:bg-gray-400 text-sm"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      ) : (
+      {/* Add to Playlist Button */}
+      {onAddToPlaylist && (
         <button
-          onClick={() => setShowRecommendInput(true)}
-          className="mt-3 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+          className="mt-3 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm w-full"
+          onClick={() => onAddToPlaylist(movie)}
         >
-          Recommend
+          Add to Playlist
         </button>
+      )}
+
+      {/* Recommend Button & Input */}
+      {onRecommend && (
+        <>
+          {showRecommendInput ? (
+            <div className="mt-2 w-full flex flex-col space-y-2">
+              <input
+                type="text"
+                placeholder="Friend's name"
+                value={friendName}
+                onChange={(e) => setFriendName(e.target.value)}
+                className="border rounded px-2 py-1 text-sm w-full"
+              />
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleRecommendSubmit}
+                  className="flex-1 bg-green-600 text-white py-1 rounded hover:bg-green-700 text-sm"
+                >
+                  Send Recommendation
+                </button>
+                <button
+                  onClick={() => {
+                    setShowRecommendInput(false);
+                    setFriendName("");
+                  }}
+                  className="flex-1 bg-gray-300 py-1 rounded hover:bg-gray-400 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowRecommendInput(true)}
+              className="mt-3 px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm w-full"
+            >
+              Recommend
+            </button>
+          )}
+        </>
       )}
     </div>
   );

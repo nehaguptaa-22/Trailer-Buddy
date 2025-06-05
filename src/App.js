@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import MovieList from "./MovieList";
 import Playlist from "./Playlist/Playlist";
 
@@ -10,21 +10,27 @@ function App() {
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
 
-  // ✅ Initialize playlist from localStorage
   const [playlist, setPlaylist] = useState(() => {
     const stored = localStorage.getItem("playlist");
     return stored ? JSON.parse(stored) : [];
   });
 
+  const [recommendations, setRecommendations] = useState(() => {
+    const stored = localStorage.getItem("recommendations");
+    return stored ? JSON.parse(stored) : {};
+  });
+
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Save playlist to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("playlist", JSON.stringify(playlist));
   }, [playlist]);
 
-  // Fetch genres
+  useEffect(() => {
+    localStorage.setItem("recommendations", JSON.stringify(recommendations));
+  }, [recommendations]);
+
   useEffect(() => {
     async function fetchGenres() {
       try {
@@ -40,7 +46,6 @@ function App() {
     fetchGenres();
   }, []);
 
-  // Fetch movies
   useEffect(() => {
     async function fetchMovies() {
       setLoading(true);
@@ -57,7 +62,9 @@ function App() {
         const data = await res.json();
 
         if (data.results) {
-          setMovies((prev) => (page === 1 ? data.results : [...prev, ...data.results]));
+          setMovies((prev) =>
+            page === 1 ? data.results : [...prev, ...data.results]
+          );
           setHasMore(page < data.total_pages);
         }
       } catch (error) {
@@ -70,14 +77,12 @@ function App() {
     fetchMovies();
   }, [page, selectedGenre]);
 
-  // Reset on genre change
   useEffect(() => {
     setMovies([]);
     setPage(1);
     setHasMore(true);
   }, [selectedGenre]);
 
-  // Add to playlist
   const addToPlaylist = (movie) => {
     setPlaylist((prev) => {
       if (prev.find((m) => m.id === movie.id)) return prev;
@@ -85,17 +90,24 @@ function App() {
     });
   };
 
-  // Remove from playlist
   const removeFromPlaylist = (id) => {
     setPlaylist((prev) => prev.filter((m) => m.id !== id));
   };
 
-  // ✅ Clear entire playlist
   const clearPlaylist = () => {
     setPlaylist([]);
   };
 
-  // Load more movies
+  const handleRecommend = (movie, friendName) => {
+    setRecommendations((prev) => {
+      const prevNames = prev[movie.id] || [];
+      if (!prevNames.includes(friendName)) {
+        return { ...prev, [movie.id]: [...prevNames, friendName] };
+      }
+      return prev;
+    });
+  };
+
   const loadMore = () => {
     if (hasMore && !loading) {
       setPage((prev) => prev + 1);
@@ -105,25 +117,25 @@ function App() {
   return (
     <div className="flex">
       <div className="flex-1 p-4 overflow-auto" style={{ maxHeight: "100vh" }}>
-        <h1 className="text-3xl font-bold mb-4">Movies</h1>
+        <h1 className="text-3xl font-bold mb-4 text-navy">Movies</h1>
 
-        {/* Genre filter buttons */}
         <div className="mb-4 flex flex-wrap gap-2">
           <button
             onClick={() => setSelectedGenre(null)}
             className={`px-3 py-1 rounded ${
-              selectedGenre === null ? "bg-blue-600 text-white" : "bg-gray-200"
+              selectedGenre === null ? "bg-navy text-white" : "bg-gray-200"
             }`}
           >
             All
           </button>
-
           {genres.map((genre) => (
             <button
               key={genre.id}
               onClick={() => setSelectedGenre(genre.id)}
               className={`px-3 py-1 rounded ${
-                selectedGenre === genre.id ? "bg-blue-600 text-white" : "bg-gray-200"
+                selectedGenre === genre.id
+                  ? "bg-navy text-white"
+                  : "bg-gray-200"
               }`}
             >
               {genre.name}
@@ -131,24 +143,28 @@ function App() {
           ))}
         </div>
 
-        <MovieList movies={movies} onAddToPlaylist={addToPlaylist} />
+        <MovieList
+          movies={movies}
+          playlist={playlist}
+          onAddToPlaylist={addToPlaylist}
+          onRemoveFromPlaylist={removeFromPlaylist}
+          onRecommend={handleRecommend}
+        />
 
-        {/* Load More button */}
         {hasMore && (
           <button
             onClick={loadMore}
             disabled={loading}
-            className="mt-4 w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="mt-4 w-full py-2 bg-navy text-white rounded hover:bg-blue-800"
           >
             {loading ? "Loading..." : "Load More"}
           </button>
         )}
       </div>
 
-      {/* Playlist Section */}
       <div className="w-80 p-4 border-l bg-gray-100 min-h-screen overflow-auto">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-bold">My Playlist</h2>
+          <h2 className="text-xl font-bold text-navy">My Playlist</h2>
           {playlist.length > 0 && (
             <button
               onClick={clearPlaylist}
